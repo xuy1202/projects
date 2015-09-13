@@ -1,0 +1,89 @@
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>WORDS</title>
+<link rel="stylesheet" href="http://cdn.bootcss.com/bootstrap/3.3.2/css/bootstrap.min.css">
+<link rel="stylesheet" href="http://cdn.bootcss.com/bootstrap/3.3.2/css/bootstrap-theme.min.css">
+
+<!--script src="/static/js/jquery-1.9.1.js"></script-->
+
+<link rel="stylesheet" href="http://code.jquery.com/mobile/1.3.2/jquery.mobile-1.3.2.min.css">
+<script src="http://code.jquery.com/jquery-1.8.3.min.js"></script>
+<script src="http://code.jquery.com/mobile/1.3.2/jquery.mobile-1.3.2.min.js"></script>
+
+<script src="http://cdn.bootcss.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
+
+
+</head>
+
+<body>
+
+{% if word_list %}
+<div class="container">
+
+  <!-- control info -->
+  <div class="row">
+      <div> &nbsp; </div>
+      <div id="functype" value="{{ functype }}" hidden></div><!-- remember words/ spelling -->
+      <div id="funcstat" value="beg" hidden></div><!-- know or not / really know -->
+      <div id="curr_idx" value=""    hidden></div>
+      <div id="nextpage" value="{{ nextpage }}" hidden></div>
+  </div>
+
+  <!-- data -->
+  <div class="row">
+    <div class="col-lg-3" id="word_container_lf"></div>
+    <div class="col-lg-6" id="word_container">
+
+{% for word in word_list %}
+
+        <div class="panel panel-info word_item" id="panel_{{ word.index }}">
+           <div class="panel-heading"><h1 class="panel-title need_substitute" id="panel_{{ word.index }}_word" value="{{word.word}}">{{ word.word }}</h1></div>
+           <div class="panel-body"><h5 id="panel_{{ word.index }}_sentence">{{ word.sentence_lh }}<span class="need_substitute" style="font-size: 16px; font-style: italic; text-decoration:underline; " id="panel_{{ word.index }}_word_in_sentence" value="{{ word.word }}"> {{ word.word }} </span>{{ word.sentence_rh }}</h5>&nbsp;</div>
+           <div class="panel-footer"><h5 id="panel_{{ word.index }}_meaning">{{ word.meaning }}</h5>&nbsp;</div>
+        </div>
+
+{% end %}
+
+    </div>
+    <div class="col-lg-3" id="word_container_rh"></div>
+  </div>
+</div>
+
+
+<div class="container">
+<div class="row">
+<div class="col-lg-3"></div>
+<div class="col-lg-6">
+    <div id="spelling" class="input-group alert alert-info">
+        <span  id="spelling_tiele_info" class="input-group-addon spelling_title">Spelling</span>
+        <span  id="spelling_tiele_succ" class="input-group-addon spelling_title">SUCCESS!</span>
+        <span  id="spelling_tiele_fail" class="input-group-addon spelling_title">WRONG!!!</span>
+        <input id="spelling_input" type="text" class="form-control" placeholder="" AUTOCOMPLETE="off">
+        <!--span class="input-group-addon"></span-->
+    </div>
+</div>
+<div class="col-lg-3"></div>
+</div>
+</div>
+
+<script src="/static/js/show_bind.js"></script>
+{% end %}
+
+{% if not word_list %}
+<div class="container">
+<div class="row">
+<div class="col-lg-3"></div>
+<div class="col-lg-6">Cons. No More Words.</div>
+<div class="col-lg-3"></div>
+</div>
+</div>
+
+{% end %}
+
+</body>
+</html>
+
+
