@@ -1,0 +1,22 @@
+#ifndef H_XXX___
+#define H_XXX__
+
+#define NS_BEG_XXX__ namespace XXX {
+#define NS_END_XXX__ }
+
+/*
+ * header files here
+ */
+
+NS_BEG_XXX__
+
+
+/*
+ * codes here
+ */
+
+
+NS_END_XXX__
+
+
+#endif // H_XXX__

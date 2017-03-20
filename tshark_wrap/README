@@ -1,0 +1,15 @@
+Steps:
+    1, put shark_hijack.h under wireshark-1.10.8/epan/ftypes/
+
+    2, modify "epan/proto.c", AFTER LAST "#include ...", add following line: 
+#include "ftypes/shark_hijack.h"
+
+    3, just make it
+
+
+To make tshark rather than all wireshark
+    1, ./configure --disable-wireshark --disable-editcap --disable-capinfos --disable-mergecap --disable-text2pcap --disable-idl2wrs --disable-dftest --disable-randpkt --disable-rawshark
+    2, make && make install
+
+
+
