@@ -27,10 +27,7 @@ class IpParser(object):
         self.sip = socket.gethostbyname(socket.gethostname())
         self.dip = ''
 
-        self.ip_ihl = 5
-        self.ip_ver = 4
         self.ip_tos = 0
-
         self.ip_tot_len = 0  # kernel will fill the correct total length
         self.ip_id = 0       # id of this packet
         self.ip_frag_off = 0
@@ -40,10 +37,10 @@ class IpParser(object):
     def ip_header(self):
         ip_saddr = socket.inet_aton(self.sip)
         ip_daddr = socket.inet_aton(self.dip)
-        ip_ihl_ver = (self.ip_ver << 4) + self.ip_ihl
+        ip_ver_ihl = int('01000101', 2) # 0100 for ipv4, 0101 for 5(*4 = 20)
         # the ! in the pack format string means network order
         ip_header = struct.pack('!BBHHHBBH4s4s',
-            ip_ihl_ver,
+            ip_ver_ihl,
             self.ip_tos,
             self.ip_tot_len,
             self.ip_id,
@@ -111,7 +108,8 @@ class TcpParser(IpParser):
         self.tcp_psh = 0
         self.tcp_ack = 0
         self.tcp_urg = 0
-        self.tcp_window = socket.htons(5840) # maximum allowed window size
+        #self.tcp_window = socket.htons(5840) # maximum allowed window size
+        self.tcp_window = 5840
         self.tcp_offset_res = (self.tcp_doff << 4) + 0
 
         self.user_data = "" 

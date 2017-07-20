@@ -7,9 +7,15 @@ import socket
 #  CPUUID.UPNP.ORG: uuid of the control point 
 #  CPFN.UPNP.ORG: test
 
+HOST = '239.255.255.250'
+HOST = '<broadcast>'
+HOST = '36.105.197.117'
+PORT = 1900
+SIZE = 1500
+
 SSDP_SEARCH_FMT = [ 
     "M-SEARCH * HTTP/1.1",
-    "HOST:239.255.255.250:1900",
+    "HOST:%s:%s"%(HOST, PORT),
     "MAN:ssdp:discover",
     "MX:1",
     "ST:ssdp:all",
@@ -18,11 +24,6 @@ SSDP_SEARCH_FMT = [
 SSDP_SEARCH_MSG = "\r\n".join(SSDP_SEARCH_FMT)
 
 print len(SSDP_SEARCH_MSG), repr(SSDP_SEARCH_MSG)
-
-HOST = '239.255.255.250'
-HOST = '<broadcast>'
-PORT = 1900
-SIZE = 1500
 
 udpCliSock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 udpCliSock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
