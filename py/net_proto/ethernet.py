@@ -24,7 +24,7 @@ def _format_mac(p1, p2, p3, p4, p5, p6):
     return r
 
 
-# vlan  : 0x8100
+# VLAN  : 0x8100
 # IP(V4): 0x0800
 # ARP   : 0x0806
 # PPPoE : 0x8864
