@@ -9,9 +9,12 @@ from . import helper
 
 
 class TCP(ctypes.Structure):
-    PROTO_NUMBER = 6
-    NAME         = "TCP"
+    PROTO_NUMBER   = 6
+    NAME           = "TCP"
+    _SUB_PROTO_MAP = {
+    }
 
+    _pack_   = 1
     _fields_ = [
         ('_sport'                  , ctypes.c_uint16),
         ('_dport'                  , ctypes.c_uint16),
@@ -70,6 +73,9 @@ class TCP(ctypes.Structure):
         )
         #return 'header_len=%s payload_len=%s'%(self.header_length(), len(self._payload))
         #return 'payload=%s'%(self._payload)
+
+    def sub_type(self):
+        return -1
 
 
 

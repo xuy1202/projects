@@ -4,6 +4,7 @@ import socket
 import struct
 import ctypes
 import traceback
+from functools import partial
 
 from socket import inet_ntoa, inet_pton
 from socket import htonl, AF_INET
@@ -28,4 +29,13 @@ def LfixPORTW(port):
 def RfixPORTW(port):
     return str(port).rjust(5, ' ')
 
+def Lfix(w, s):
+    return str(s).ljust(w, ' ')
+Lfix4  = partial(Lfix, 4)
+Lfix13 = partial(Lfix, 13)
+
+def Rfix(w, s):
+    return str(s).rjust(w, ' ')
+Rfix4  = partial(Rfix, 4)
+Rfix13 = partial(Rfix, 13)
 

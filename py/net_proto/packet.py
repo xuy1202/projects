@@ -15,28 +15,25 @@ from .helper import LfixIPW, RfixIPW
 from .helper import LfixPORTW, RfixPORTW
 
 
-_PROTO_MAP = {
-    icmp.ICMP.PROTO_NUMBER: icmp.ICMP,
-    tcp.TCP.PROTO_NUMBER  : tcp.TCP,
-    udp.UDP.PROTO_NUMBER  : udp.UDP,
-}
-
 
 class Packet(object):
     def __init__(self):
         self.layers = []
 
-    def parse_from_buffer(self, buffer):
+    def parse_from_buffer(self, buffer, Proto=ip.IP):
         self.length = len(buffer)
+        while Proto:
+            pobj = Proto(buffer)
+            setattr(self, pobj.NAME, pobj)
+            if self.layers:
+                setattr(self.layers[-1], pobj.NAME, pobj)
+            self.layers.append(pobj)
 
-        self.IP   = ip.IP(buffer)
-        self.layers.append(self.IP)
+            buffer = pobj._payload
+            Proto = Proto._SUB_PROTO_MAP.get(pobj.sub_type(), None)
 
-        subt = _PROTO_MAP.get(self.IP.proto(), None)
-        if subt:
-            o = subt(buffer[self.IP.header_length():])
-            setattr(self, o.NAME, o)
-            self.layers.append(o)
+    def _str_IP(self):
+        return str(self.IP)
 
     def _str_IP_ICMP(self):
         _f = 'ICMP %s -> %s %s\t[%%s] [%%s]'%(
@@ -45,6 +42,7 @@ class Packet(object):
             self.length
         )
         return _f%(self.IP.info(), self.ICMP.info())
+    _str_ETHERNET_IP_ICMP = _str_IP_ICMP
 
     def _str_IP_UDP(self):
         _f = 'UDP  %s:%s -> %s:%s\t%s\t[%%s] [%%s]'%(
@@ -55,6 +53,7 @@ class Packet(object):
             self.length
         )
         return _f%(self.IP.info(), self.UDP.info())
+    _str_ETHERNET_IP_UDP = _str_IP_UDP
 
     def _str_IP_TCP(self):
         _f = 'TCP  %s:%s -> %s:%s\t%s\t[%%s] [%%s]'%(
@@ -65,6 +64,7 @@ class Packet(object):
             self.length
         )
         return _f%(self.IP.info(), self.TCP.info())
+    _str_ETHERNET_IP_TCP = _str_IP_TCP
 
     def __str__(self):
         strname = '_str_' + '_'.join([i.NAME for i in self.layers])
@@ -72,6 +72,6 @@ class Packet(object):
         if strfunc:
             return strfunc()
         else:
-            return str(self.layers)
+            return '\t'.join([str(i) for i in self.layers])
 
 

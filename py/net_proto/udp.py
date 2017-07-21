@@ -9,9 +9,12 @@ from . import helper
 
 
 class UDP(ctypes.Structure):
-    PROTO_NUMBER = 17
-    NAME         = "UDP"
+    PROTO_NUMBER   = 17
+    NAME           = "UDP"
+    _SUB_PROTO_MAP = {
+    }
 
+    _pack_   = 1
     _fields_ = [
         ('_sport'       , ctypes.c_uint16),
         ('_dport'       , ctypes.c_uint16),
@@ -32,9 +35,12 @@ class UDP(ctypes.Structure):
     def dport(self): return socket.htons(self._dport)
 
     def __str__(self):
-        return '<UDP>\t%s\t->\t%s'%(socket.htons(self._sport), socket.htons(self._dport))
+        return '<UDP>  %s\t->\t%s'%(socket.htons(self._sport), socket.htons(self._dport))
 
     def __repr__(self):
         return '<%s>'%self.NAME
+
+    def sub_type(self):
+        return -1
 
 
