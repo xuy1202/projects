@@ -12,7 +12,7 @@ from twisted.names import server
 from twisted.names import common 
 
 
-R = common.ResolverBase()
+R = client.Resolver(resolv='/etc/resolv.conf')
 
 
 class DynamicResolver(object):
@@ -21,10 +21,12 @@ class DynamicResolver(object):
 
     def _getA(self, name):
         self.record[name] += 1
-        if self.record[name] <= 1:
-            ip = "45.77.11.22"
-        else:
-            ip = "127.0.0.1"
+        #if self.record[name] <= 1:
+        #    ip = "45.77.11.22"
+        #else:
+        #    ip = "127.0.0.1"
+        ip = "127.0.0.1"
+        ip = "192.168.3.2"
         print name + " ===> " + ip
         answer = dns.RRHeader(
             name = name,
@@ -53,9 +55,11 @@ class DynamicResolver(object):
 
     def _doDynamicResponse(self, query):
         name = query.name.name
-        if query.type is dns.A:
+        return self._getA(name)
+        if name.endswith('.163.com'):
             return self._getA(name)
-        return self._getAny(name)
+        else:
+            return R.query(query)
 
     def query(self, query, timeout=None):
         return defer.succeed(self._doDynamicResponse(query))
@@ -68,8 +72,9 @@ def main():
     factory = server.DNSServerFactory(
         clients=[DynamicResolver(), client.Resolver(resolv='/etc/resolv.conf')]
     )
+    reactor.listenTCP(53, factory)
     protocol = dns.DNSDatagramProtocol(controller=factory)
-    reactor.listenUDP(53535, protocol)
+    reactor.listenUDP(53, protocol)
     reactor.run()
 
 if __name__ == '__main__':
