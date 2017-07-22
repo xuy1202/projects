@@ -100,7 +100,7 @@ class Dispatcher(threading.Thread):
 
     def _parse_https_raw(self, data):
         # i think host must in top 10 lines
-        logging.info('http raw:' + repr(data))
+        #logging.info('http raw:' + repr(data))
         SSLPack = ssl.SSL_Handshake(data)
         host = SSLPack.server_name()
         port = 443
