@@ -32,15 +32,14 @@ _DEFAULT_TMOT = 10
 _DEFAULT_HOST = 'cybatk.com'
 _DEFAULT_PAGE = '''\
 HTTP/1.1 302 FOUND\r
-Server: cybatk.com\r
-Location: http://cybatk.com
+Location: http://%s
 Content-Type: text/html; charset=utf-8\r
 Access-Control-Allow-Origin: *\r
 Content-Encoding: gzip\r
 Content-Length: 0\r
 Accept-Ranges: bytes\r
 \r
-'''
+'''%_DEFAULT_HOST
 
 
 class Dispatcher(threading.Thread):
