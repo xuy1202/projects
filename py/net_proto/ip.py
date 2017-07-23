@@ -9,6 +9,8 @@ from . import icmp
 from . import tcp
 from . import udp
 from . import helper
+from .helper import LfixIPW, RfixIPW
+from .helper import LfixPORTW, RfixPORTW
 
 
 class IP(ctypes.Structure):
@@ -57,7 +59,7 @@ class IP(ctypes.Structure):
         return 'ttl=%s tos=%s'%(self._ttl, self._tos)
 
     def __str__(self):
-        return '<%s> %s\t->\t%s\t%s'%(self.NAME, self.sip(), self.dip(), self.proto())
+        return '<%s> %s -> %s'%(self.NAME, RfixIPW(self.sip()), RfixIPW(self.dip()))
 
     def __repr__(self):
         return '<%s>'%self.NAME

@@ -5,6 +5,7 @@ import struct
 import ctypes
 import traceback
 
+from . import dns
 from . import helper
 
 
@@ -12,6 +13,7 @@ class UDP(ctypes.Structure):
     PROTO_NUMBER   = 17
     NAME           = "UDP"
     _SUB_PROTO_MAP = {
+        53: dns.DNS,
     }
 
     _pack_   = 1
@@ -41,6 +43,8 @@ class UDP(ctypes.Structure):
         return '<%s>'%self.NAME
 
     def sub_type(self):
+        if self.sport() == 53 or self.dport() == 53:
+            return 53
         return -1
 
 

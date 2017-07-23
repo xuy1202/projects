@@ -12,42 +12,46 @@ from net_proto import ethernet
 from net_proto.helper import Lfix13
 
 import helper
-import udp_data
+from data import udp_data
 
 import pcap
 
 
-PROTO = 0
-for n in dir(socket):
-    if n.find('SOCK') < 0:
-        continue
-    #print n
-    PROTO |= getattr(socket, n)
-PROTO = socket.IPPROTO_FRAGMENT
-PROTO = socket.IPPROTO_TCP
-
-
 def pcap_snif():
-    sniffer = pcap.pcapObject()
-    sniffer.open_live('eth0', 65535, True, 100) # device, snaplength, promiscous_mode, timeout
     capture_filter = 'arp'
     capture_filter = 'host 106.187.47.79'
-    sniffer.setfilter(capture_filter, 0, 0)
-    #filename = '/tmp/%s.pcap'%capture_filter.replace(' ', '_')
-    #sniffer.dump_open(filename)
+    capture_filter = 'icmp'
+    capture_filter = ''
+
     def proc(pktlen, data, timestamp):
         P = packet.Packet()
         P.parse_from_buffer(data, ethernet.ETHERNET)
         ostr = str(P)
         print Lfix13(timestamp), ostr
-    while 1:
-        sniffer.dispatch(1, proc)
-        #sniffer.dispatch(1, None) # dump to file
+
+    if getattr(pcap, 'pcap', None):
+        #sniffer = pcap.pcap('en0', immediate=True)
+        sniffer = pcap.pcap(immediate=True)
+        if capture_filter:
+            sniffer.setfilter(capture_filter)
+        sniffer.setnonblock(True)
+        for timestamp, data in sniffer:
+            proc(0, data, timestamp)
+    else:
+        sniffer = pcap.pcapObject()
+        sniffer.open_live('eth0', 65535, True, 100) # device, snaplength, promiscous_mode, timeout
+        if capture_filter:
+            sniffer.setfilter(capture_filter, 0, 0)
+        #filename = '/tmp/%s.pcap'%capture_filter.replace(' ', '_')
+        #sniffer.dump_open(filename)
+        while 1:
+            sniffer.dispatch(1, proc)
+            #sniffer.dispatch(1, None) # dump to file
     sys.exit(0)
 
 
 def rawsocket():
-    sniffer = socket.socket(socket.AF_INET, socket.SOCK_RAW, PROTO)
+    sniffer = socket.socket(socket.AF_INET, socket.SOCK_RAW, socket.IPPROTO_UDP)
     #sniffer.bind((host, 0))
     # include the IP headers in the captured packets
     sniffer.setsockopt(socket.IPPROTO_IP, socket.IP_HDRINCL, 1)

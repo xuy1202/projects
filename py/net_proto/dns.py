@@ -40,8 +40,12 @@ class DNS(ctypes.Structure):
     def authority_len(self) : return socket.htons(self._authority_len)
     def additional_len(self): return socket.htons(self._additional_len)
 
+    def rcode(self):
+        rc = self.flags() & 0x0f
+        return rc
+
     def tag(self):
-        return 'response' if (self.flags() >> 15) else 'query'
+        return 'R' if (self.flags() >> 15) else 'Q'
 
     def _read_name(self, data):
         parts = []
@@ -115,23 +119,37 @@ class DNS(ctypes.Structure):
         return ','.join(list(set([i[2] for i in self.querys])))
 
     def rnames(self):
-        return ','.join(list(set([i[2] for i in self.responses])))
+        rnames = ','.join(list(set([i[2] for i in self.responses])))
+        if rnames:
+            return rnames
+        else:
+            return self.qnames()
+
+    def ttls(self):
+        return ','.join(list(set([str(i[3]) for i in self.responses])))
 
     def rdatas(self):
-        return ','.join(list(set([i[4] for i in self.responses])))
+        rcode = self.rcode()
+        if rcode == 0 and self.responses:
+            return ','.join(list(set([i[4] for i in self.responses])))
+        return 'e%d'%rcode
 
-    def __str__(self):
+    def info(self):
         self.parse_records()
         tag = self.tag()
-        if tag == 'query':
+        if tag == 'Q':
             info = self.qnames()
         else:
-            info = '%s -> %s'%(self.rnames(), self.rdatas())
-        return 'DNS:%s tid=%s %s'%(self.tag(),
+            info = '%s -> %s ttls=%s'%(self.rnames(), self.rdatas(), self.ttls())
+        return '%s tid=%s %s'%(self.tag(),
             self.transaction_id(),
             info,
         )
-        return 'DNS:%s %s tid=%s, flags=%s, query=%s, response=%s, authority=%s, additoonal=%s'%(self.tag(),
+
+    def __str__(self):
+        info = self.info()
+        return '<DNS> ' + info
+        return '%s %s tid=%s, flags=%s, query=%s, response=%s, authority=%s, additoonal=%s'%(self.tag(),
             info,
             self.transaction_id(),
             self.flags(),
