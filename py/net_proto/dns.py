@@ -267,10 +267,10 @@ class DNS(ctypes.Structure):
         if tag == 'Q':
             info = qs
         else:
-            rs = '; '.join(['%s(%s)'%(get_type_name(q[0]), q[4]) for q in self.responses])
-            a1 = '; '.join(['%s(%s)'%(get_type_name(q[0]), q[4]) for q in self.authoritys])
-            a2 = '; '.join(['%s(%s)'%(get_type_name(q[0]), q[4]) for q in self.additionals])
-            info = '%s -> RS{%s} AU{%s} AD{%s}'%(qs, rs, a1, a2)
+            rs = '; '.join(['%s->%s:%s'%(q[2], get_type_name(q[0]), q[4]) for q in self.responses])
+            a1 = '; '.join(['%s->%s:%s'%(q[2], get_type_name(q[0]), q[4]) for q in self.authoritys])
+            a2 = '; '.join(['%s->%s:%s'%(q[2], get_type_name(q[0]), q[4]) for q in self.additionals])
+            info = '%s RS:{%s} AU:{%s} AD:{%s}'%(qs, rs, a1, a2)
             #info = '%s %s -> %s ttl=%s'%(self.rtypes(), self.rnames(), self.rdatas(), self.ttls())
         return '%s tid=%s %s'%(self.tag(),
             self.transaction_id(),
