@@ -5,6 +5,7 @@ import struct
 import ctypes
 import traceback
 
+from . import dns
 from . import helper
 
 
@@ -12,6 +13,7 @@ class TCP(ctypes.Structure):
     PROTO_NUMBER   = 6
     NAME           = "TCP"
     _SUB_PROTO_MAP = {
+        53: dns.DNS_TCP,
     }
 
     _pack_   = 1
@@ -62,8 +64,6 @@ class TCP(ctypes.Structure):
         return flags
 
     def info(self):
-        #if self._payload:
-        #    print self._payload
         return 'flags=%s seq=%s ack=%s win=%s payload_len=%s'%(
             self.flags(),
             self.seq(),
@@ -75,6 +75,9 @@ class TCP(ctypes.Structure):
         #return 'payload=%s'%(self._payload)
 
     def sub_type(self):
+        # handshack without payload
+        if len(self._payload) >= ctypes.sizeof(dns.DNS_TCP) and (self.sport() == 53 or self.dport() == 53):
+            return 53 
         return -1
 
 

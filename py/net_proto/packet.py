@@ -1,5 +1,6 @@
 #coding: utf-8
 
+import os, sys
 import socket
 import struct
 import ctypes
@@ -21,6 +22,7 @@ class Packet(object):
         self.layers = []
 
     def parse_from_buffer(self, buffer, Proto=ip.IP):
+        self._payload = buffer
         self.length = len(buffer)
         while Proto:
             pobj = Proto(buffer)
@@ -66,20 +68,38 @@ class Packet(object):
         return _f%(self.IP.info(), self.TCP.info())
     _str_TCP_IP_ETHERNET = _str_TCP_IP
 
-    def _str_DNS(self):
-        _f = 'DNS  %s:%s -> %s:%s\t%s\t[%%s] [%%s]'%(
+    def _str_DNS_UDP(self):
+        _f = 'DNS  %s:%s -> %s:%s\t%s\t[%%s]'%(
             RfixIPW(   self.IP.sip()    ),
             LfixPORTW( self.UDP.sport() ),
             RfixIPW(   self.IP.dip()    ),
             LfixPORTW( self.UDP.dport() ),
             self.length
         )
-        return _f%(self.IP.info(), self.DNS.info())
-    _str_DNS_UDP             = _str_DNS
-    _str_DNS_UDP_IP          = _str_DNS
-    _str_DNS_UDP_IP_ETHERNET = _str_DNS
+        return _f%(self.DNS.info())
+    _str_DNS_UDP_IP          = _str_DNS_UDP
+    _str_DNS_UDP_IP_ETHERNET = _str_DNS_UDP
+
+    def _str_DNS_TCP(self):
+        _f = 'DNS  %s:%s -> %s:%s\t%s\t[%%s]'%(
+            RfixIPW(   self.IP.sip()    ),
+            LfixPORTW( self.TCP.sport() ),
+            RfixIPW(   self.IP.dip()    ),
+            LfixPORTW( self.TCP.dport() ),
+            self.length
+        )
+        return _f%(self.DNS.info())
+    _str_DNS_TCP_IP          = _str_DNS_TCP
+    _str_DNS_TCP_IP_ETHERNET = _str_DNS_TCP
 
     def __str__(self):
+        spayload = self._payload
+        for l in self.layers:
+            perr = getattr(l, 'parse_error', None)
+            if perr:
+                sys.stderr.write(">>> Parse Error<%s>[%s]\n"%(l.NAME, repr(spayload)))
+            else:
+                spayload = l._payload
         strname = '_str_' + '_'.join([i.NAME for i in self.layers[::-1]])
         strfunc = getattr(self, strname, None)
         if strfunc:

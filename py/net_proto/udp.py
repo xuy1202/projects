@@ -13,7 +13,7 @@ class UDP(ctypes.Structure):
     PROTO_NUMBER   = 17
     NAME           = "UDP"
     _SUB_PROTO_MAP = {
-        53: dns.DNS,
+        53: dns.DNS_UDP,
     }
 
     _pack_   = 1
@@ -46,5 +46,6 @@ class UDP(ctypes.Structure):
         if self.sport() == 53 or self.dport() == 53:
             return 53
         return -1
+
 
 

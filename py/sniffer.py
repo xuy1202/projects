@@ -8,6 +8,7 @@ import ctypes
 from net_proto import packet
 from net_proto import udp
 from net_proto import arp
+from net_proto import dns
 from net_proto import ethernet
 from net_proto.helper import Lfix13
 
@@ -21,13 +22,15 @@ def pcap_snif():
     capture_filter = 'arp'
     capture_filter = 'host 106.187.47.79'
     capture_filter = 'icmp'
-    capture_filter = ''
+    capture_filter = 'tcp and port 53'
+    capture_filter = 'port 53'
 
     def proc(pktlen, data, timestamp):
         P = packet.Packet()
         P.parse_from_buffer(data, ethernet.ETHERNET)
         ostr = str(P)
-        print Lfix13(timestamp), ostr
+        if ostr:
+            print Lfix13(timestamp), ostr
 
     if getattr(pcap, 'pcap', None):
         #sniffer = pcap.pcap('en0', immediate=True)
