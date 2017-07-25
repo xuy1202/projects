@@ -14,6 +14,7 @@ class UDP(ctypes.Structure):
     NAME           = "UDP"
     _SUB_PROTO_MAP = {
         53: dns.DNS_UDP,
+        #443: quic.QUIC, # Quick UDP Internet Connections
     }
 
     _pack_   = 1

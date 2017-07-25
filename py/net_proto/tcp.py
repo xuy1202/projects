@@ -16,6 +16,7 @@ class TCP(ctypes.Structure):
     _SUB_PROTO_MAP = {
         53: dns.DNS_TCP,
         80: http.HTTP,
+        #443: https.HTTPS,
     }
 
     _pack_   = 1
