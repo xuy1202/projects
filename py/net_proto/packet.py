@@ -58,14 +58,14 @@ class Packet(object):
     _str_UDP_IP_ETHERNET = _str_UDP_IP
 
     def _str_TCP_IP(self):
-        _f = 'TCP  %s:%s -> %s:%s\t%s\t[%%s] [%%s]'%(
+        _f = 'TCP  %s:%s -> %s:%s\t%s\t[%%s]'%(
             RfixIPW(   self.IP.sip()    ),
             LfixPORTW( self.TCP.sport() ),
             RfixIPW(   self.IP.dip()    ),
             LfixPORTW( self.TCP.dport() ),
             self.length
         )
-        return _f%(self.IP.info(), self.TCP.info())
+        return _f%(self.TCP.info())
     _str_TCP_IP_ETHERNET = _str_TCP_IP
 
     def _str_DNS_UDP(self):
@@ -91,6 +91,18 @@ class Packet(object):
         return _f%(self.DNS.info())
     _str_DNS_TCP_IP          = _str_DNS_TCP
     _str_DNS_TCP_IP_ETHERNET = _str_DNS_TCP
+
+    def _str_HTTP_TCP(self):
+        _f = 'HTTP %s:%s -> %s:%s\t%s\t[%%s]'%(
+            RfixIPW(   self.IP.sip()    ),
+            LfixPORTW( self.TCP.sport() ),
+            RfixIPW(   self.IP.dip()    ),
+            LfixPORTW( self.TCP.dport() ),
+            self.length
+        )
+        return _f%(self.TCP.info())
+    _str_HTTP_TCP_IP          = _str_HTTP_TCP
+    _str_HTTP_TCP_IP_ETHERNET = _str_HTTP_TCP
 
     def __str__(self):
         spayload = self._payload

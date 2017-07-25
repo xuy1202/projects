@@ -6,6 +6,7 @@ import ctypes
 import traceback
 
 from . import dns
+from . import http
 from . import helper
 
 
@@ -14,6 +15,7 @@ class TCP(ctypes.Structure):
     NAME           = "TCP"
     _SUB_PROTO_MAP = {
         53: dns.DNS_TCP,
+        80: http.HTTP,
     }
 
     _pack_   = 1
@@ -78,6 +80,9 @@ class TCP(ctypes.Structure):
         # handshack without payload
         if len(self._payload) >= ctypes.sizeof(dns.DNS_TCP) and (self.sport() == 53 or self.dport() == 53):
             return 53 
+        # len(GET / HTTP/1.0) == 14
+        if len(self._payload) >= 14 and 80 in [self.sport(), self.dport()]:
+            return 80
         return -1
 
 

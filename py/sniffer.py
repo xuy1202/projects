@@ -23,7 +23,7 @@ def pcap_snif():
     capture_filter = 'host 106.187.47.79'
     capture_filter = 'icmp'
     capture_filter = 'tcp and port 53'
-    capture_filter = 'port 53'
+    capture_filter = 'tcp and port 80'
 
     def proc(pktlen, data, timestamp):
         P = packet.Packet()
@@ -42,7 +42,8 @@ def pcap_snif():
             proc(0, data, timestamp)
     else:
         sniffer = pcap.pcapObject()
-        sniffer.open_live('eth0', 65535, True, 100) # device, snaplength, promiscous_mode, timeout
+        # device, snaplength, promiscous_mode, timeout
+        sniffer.open_live('eth0', 65535, True, 100)
         if capture_filter:
             sniffer.setfilter(capture_filter, 0, 0)
         #filename = '/tmp/%s.pcap'%capture_filter.replace(' ', '_')

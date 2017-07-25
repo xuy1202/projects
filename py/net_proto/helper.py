@@ -39,3 +39,30 @@ def Rfix(w, s):
 Rfix4  = partial(Rfix, 4)
 Rfix13 = partial(Rfix, 13)
 
+
+def hexdump(buffer, callback=None):
+    hex_str = ''
+    raw_str = ''
+    def output(hex_str, raw_str):
+        line = '%s\t%s'%(hex_str.ljust(90, ' '), repr(raw_str))
+        if callback:
+            callback(line)
+        else:
+            print line
+    for index, chunk in enumerate(buffer):
+        if (index+0) % 32 == 0:
+            offset = '0x' + (hex(index)[2:]).rjust(8, '0')
+            hex_str += '    '
+            hex_str += offset
+            hex_str += ' '
+        raw_str += chunk
+        hex_str += chunk.encode('hex')
+        if (index+1) % 2  == 0:
+            hex_str += ' '
+        if (index+1) % 32 == 0:
+            output(hex_str, raw_str)
+            hex_str = raw_str = ''
+    output(hex_str, raw_str)
+
+
+
