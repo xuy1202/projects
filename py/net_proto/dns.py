@@ -6,6 +6,7 @@ import struct
 import ctypes
 import traceback
 
+from . import proto
 from . import helper
 
 
@@ -215,7 +216,7 @@ class DNS(ctypes.Structure):
             self.additionals, r_list = r_list[:self.additional_len()], r_list[self.additional_len():]
         except Exception, e:
             #print traceback.format_exc()
-            self.parse_error = True
+            setattr(self, proto.ParseError, True)
 
     def qtypes(self):
         return ','.join(list(set([str(get_type_name(i[0])) for i in self.querys])))

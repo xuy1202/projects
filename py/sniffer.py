@@ -23,7 +23,7 @@ def pcap_snif():
     capture_filter = 'host 106.187.47.79'
     capture_filter = 'icmp'
     capture_filter = 'tcp and port 53'
-    capture_filter = 'tcp and port 80'
+    capture_filter = 'tcp and port 443'
 
     def proc(pktlen, data, timestamp):
         P = packet.Packet()

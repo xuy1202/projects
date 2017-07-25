@@ -6,17 +6,20 @@ import ctypes
 import traceback
 
 from . import dns
+from . import ssl
 from . import http
 from . import helper
+
+
 
 
 class TCP(ctypes.Structure):
     PROTO_NUMBER   = 6
     NAME           = "TCP"
     _SUB_PROTO_MAP = {
-        53: dns.DNS_TCP,
-        80: http.HTTP,
-        #443: https.HTTPS,
+        53 : dns.DNS_TCP,
+        80 : http.HTTP,
+        443: ssl.SSL,
     }
 
     _pack_   = 1
@@ -84,6 +87,8 @@ class TCP(ctypes.Structure):
         # len(GET / HTTP/1.0) == 14
         if len(self._payload) >= 14 and 80 in [self.sport(), self.dport()]:
             return 80
+        if len(self._payload) >= 14 and 443 in [self.sport(), self.dport()]:
+            return 443
         return -1
 
 

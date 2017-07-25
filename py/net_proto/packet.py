@@ -6,6 +6,7 @@ import struct
 import ctypes
 import traceback
 
+from . import proto 
 from . import ip
 from . import icmp
 from . import tcp
@@ -26,13 +27,17 @@ class Packet(object):
         self.length = len(buffer)
         while Proto:
             pobj = Proto(buffer)
-            setattr(self, pobj.NAME, pobj)
-            if self.layers:
-                setattr(self.layers[-1], pobj.NAME, pobj)
-            self.layers.append(pobj)
+            perr = getattr(pobj, proto.ParseError, None)
+            if perr:
+                break
+            else:
+                setattr(self, pobj.NAME, pobj)
+                if self.layers:
+                    setattr(self.layers[-1], pobj.NAME, pobj)
+                self.layers.append(pobj)
 
-            buffer = pobj._payload
-            Proto = Proto._SUB_PROTO_MAP.get(pobj.sub_type(), None)
+                buffer = pobj._payload
+                Proto = Proto._SUB_PROTO_MAP.get(pobj.sub_type(), None)
 
     def _str_IP(self):
         return str(self.IP)
@@ -104,10 +109,22 @@ class Packet(object):
     _str_HTTP_TCP_IP          = _str_HTTP_TCP
     _str_HTTP_TCP_IP_ETHERNET = _str_HTTP_TCP
 
+    def _str_SSL_TCP(self):
+        _f = 'SSL  %s:%s -> %s:%s\t%s\t[%%s]'%(
+            RfixIPW(   self.IP.sip()    ),
+            LfixPORTW( self.TCP.sport() ),
+            RfixIPW(   self.IP.dip()    ),
+            LfixPORTW( self.TCP.dport() ),
+            self.length
+        )
+        return _f%(self.SSL.info())
+    _str_SSL_TCP_IP          = _str_SSL_TCP
+    _str_SSL_TCP_IP_ETHERNET = _str_SSL_TCP
+
     def __str__(self):
         spayload = self._payload
         for l in self.layers:
-            perr = getattr(l, 'parse_error', None)
+            perr = getattr(l, proto.ParseError, None)
             if perr:
                 sys.stderr.write(">>> Parse Error<%s>[%s]\n"%(l.NAME, repr(spayload)))
             else:
