@@ -158,6 +158,28 @@ class SSL_Handshake(ctypes.Structure):
         else:
             return str(t)
 
+    def application_layer_proto_negotiation(self):
+        def find_alpn(dat):
+            rets = []
+            while dat:
+                _type = struct.unpack('!H', dat[0:2])[0]
+                _lens = struct.unpack('!H', dat[2:4])[0]
+                dat = dat[4:]
+                _dat, dat = dat[:_lens], dat[_lens:]
+                if _type != 0x0010:
+                    continue
+                alpn_ext_len = struct.unpack('!H', _dat[0:2])[0]
+                _dat = _dat[2:2+alpn_ext_len]
+                while _dat:
+                    alpn_str_len = ord(_dat[0])
+                    alpn_proto_s = _dat[1:1+alpn_str_len]
+                    rets.append(alpn_proto_s)
+                    _dat = _dat[1+alpn_str_len:]
+                break
+            return ','.join(rets)
+        try: return find_alpn(self.extension_dat)
+        except: return ''
+
     # fucking complicated
     def server_name(self):
         def find_server_name_extension(dat):
@@ -177,7 +199,14 @@ class SSL_Handshake(ctypes.Structure):
         except: return ''
 
     def __str__(self):
-        return '%s %s %s'%(self.NAME, self.handshake_type_tag(), self.server_name())
+        rets = '%s %s'%(self.NAME, self.handshake_type_tag())
+        t = self.handshake_type()
+        if t == 1 or t == 2:
+            sn = self.server_name()
+            ap = self.application_layer_proto_negotiation()
+            if sn: rets += " To:%s"%sn
+            if ap: rets += " ALPN:%s"%ap
+        return rets
 
 
 class SSL(ctypes.Structure):
@@ -224,13 +253,6 @@ class SSL(ctypes.Structure):
 
     def info(self):
         return str(self.Message)
-
-
-if __name__ == "__main__":
-    dat = '\x16\x03\x01\x00\xec\x01\x00\x00\xe8\x03\x03?\x08F\xd3\x95\xc7\xd1\xe6h\xd16\xd6\xe8K\x0c\xbcf\xbd\xaa\x9e\xce0\x15\x9a\xfc\x14\xcem\x04}\x9c\xf7 \xd8\xc6St\xb8\xe6\xa3\xf9\x84Sz\x86D\xe8\r\x17u0\x17\xe1\xfa?B\xb2DC.\xfa\xfb\x1f\x8c\xa1\x00\x1c::\xc0+\xc0/\xc0,\xc00\xcc\xa9\xcc\xa8\xc0\x13\xc0\x14\x00\x9c\x00\x9d\x00/\x005\x00\n\x01\x00\x00\x83JJ\x00\x00\xff\x01\x00\x01\x00\x00\x00\x00\x1a\x00\x18\x00\x00\x15www.hypercomments.com\x00\x17\x00\x00\x00#\x00\x00\x00\r\x00\x14\x00\x12\x04\x03\x08\x04\x04\x01\x05\x03\x08\x05\x05\x01\x08\x06\x06\x01\x02\x01\x00\x05\x00\x05\x01\x00\x00\x00\x00\x00\x12\x00\x00\x00\x10\x00\x0e\x00\x0c\x02h2\x08http/1.1uP\x00\x00\x00\x0b\x00\x02\x01\x00\x00\n\x00\n\x00\x08\n\n\x00\x1d\x00\x17\x00\x18\xda\xda\x00\x01\x00'
-    dat = '\x16\x03\x01\x00\xcc\x01\x00\x00\xc8\x03\x03\xa7}(\xd0\x85\x96\x08\xd2\n\x7f]\x08\xeaE\xea\xfc\x87~\xfa\xbb\xb2\xfag\xf0g\xcb\xf4\x04`>\x196\x00\x00\x1c\xaa\xaa\xc0+\xc0/\xc0,\xc00\xcc\xa9\xcc\xa8\xc0\x13\xc0\x14\x00\x9c\x00\x9d\x00/\x005\x00\n\x01\x00\x00\x83**\x00\x00\xff\x01\x00\x01\x00\x00\x00\x00\x1a\x00\x18\x00\x00\x15www.hypercomments.com\x00\x17\x00\x00\x00#\x00\x00\x00\r\x00\x14\x00\x12\x04\x03\x08\x04\x04\x01\x05\x03\x08\x05\x05\x01\x08\x06\x06\x01\x02\x01\x00\x05\x00\x05\x01\x00\x00\x00\x00\x00\x12\x00\x00\x00\x10\x00\x0e\x00\x0c\x02h2\x08http/1.1uP\x00\x00\x00\x0b\x00\x02\x01\x00\x00\n\x00\n\x00\x08zz\x00\x1d\x00\x17\x00\x18\xda\xda\x00\x01\x00'
-    SSLPack = SSL(dat)
-    print SSLPack.info()
 
 
 
